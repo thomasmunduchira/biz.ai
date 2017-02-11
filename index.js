@@ -2,9 +2,9 @@ var Alexa = require('alexa-sdk');
 var WooCommerceAPI = require('woocommerce-api');
 
 var WooCommerce = new WooCommerceAPI({
-  url: 'https://dhanushpatel.000webhostapp.com',
-  consumerKey: 'ck_4a18255b52a2ee95a43716f0df4b3fc56de97ba1',
-  consumerSecret: 'cs_78c7fc4eb8e38046f7529426190f2e0bdadbeb7e',
+  url: 'http://dhanushpatel.x10host.com',
+  consumerKey: 'ck_365a06a1c7fb871432485d71d8a5c3aa063fa958',
+  consumerSecret: 'cs_53601b80bf1829af2bfcaa1d90e44642d13b9249',
   wp_api: true,
   version: 'wc/v1'
 });
@@ -40,7 +40,6 @@ var handlers = {
   },
   "GetNumOrders": function() {
     console.log("GetNumOrders");
-    var numOrders = 0;
     WooCommerce.get('customers', function(err, data, res) {
       if (err) {
         return console.log(err);
