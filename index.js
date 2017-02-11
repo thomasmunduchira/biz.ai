@@ -40,7 +40,16 @@ var handlers = {
   },
   "GetNumOrders": function() {
     console.log("GetNumOrders");
-    this.emit(":tell", "hello");
+    var numOrders = 0;
+    WooCommerce.get('customers', function(err, data, res) {
+      if (err) {
+        return console.log(err);
+      }
+      var numOrders = res.length;
+      var speech = "You currently have " + numOrders + " orders";
+      console.log(speech);
+      this.emit(":tell", speech);
+    });
   },
   "MostReturnedProduct": function() {
     console.log("MostReturnedProduct");
