@@ -26,6 +26,15 @@ var handlers = {
     this.attributes.repromptSpeech = "To find , say something like: what was ?";
     this.emit(":ask", this.attributes.speechOutput, this.attributes.repromptSpeech);
   },
+  "GetCustomerOrigins": function(){
+    var origins = [];
+    var speech = "Your customers are from " + origins + " and so on";
+    WooCommerce.get('customers', function(err, data, res) {
+      res.map(function(customer) {
+        origins.push(customer.billing.country);
+      });
+    });
+  },
   "GetNumOrders": function() {
     console.log("GetNumOrders");
     this.emit(":tell", "hello");
