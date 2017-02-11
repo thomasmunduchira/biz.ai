@@ -1,4 +1,4 @@
-var Alexa = require("alexa-sdk");
+var Alexa = require('alexa-sdk');
 var WooCommerceAPI = require('woocommerce-api');
 
 var WooCommerce = new WooCommerceAPI({
@@ -60,6 +60,22 @@ var handlers = {
           }
           frequencyMap[product_id]++;
         });
+      });
+    });
+  },
+  "MostPopularProduct": function() {
+    console.log("MostPopularProduct");
+    WooCommerce.get('products', function(err, data, res) {
+      if (err) {
+        return console.log(err);
+      }
+      var max_product_name;
+      var max_product_sales;
+      product_ids.forEach(function(product) {
+        if (product.total_sales > max_product_sales) {
+          max_product_name = product.name;
+          max_product_sales = product.total_sales;
+        }
       });
     });
   },
