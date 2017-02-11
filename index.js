@@ -2,10 +2,10 @@ var Alexa = require("alexa-sdk");
 var WooCommerceAPI = require('woocommerce-api');
 
 var WooCommerce = new WooCommerceAPI({
-  url: 'http://example.com',
-  consumerKey: 'ck_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-  consumerSecret: 'cs_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-  wpAPI: true,
+  url: 'https://dhanushpatel.000webhostapp.com',
+  consumerKey: 'ck_4a18255b52a2ee95a43716f0df4b3fc56de97ba1',
+  consumerSecret: 'cs_78c7fc4eb8e38046f7529426190f2e0bdadbeb7e',
+  wp_api: true,
   version: 'wc/v1'
 });
 
