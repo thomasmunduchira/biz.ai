@@ -2,10 +2,10 @@ var Alexa = require('alexa-sdk');
 var WooCommerceAPI = require('woocommerce-api');
 
 var WooCommerce = new WooCommerceAPI({
-  url: 'http://dhanushpatel.x10host.com',
+  url: 'http://dhanushpatel.x10host.com/',
   consumerKey: 'ck_365a06a1c7fb871432485d71d8a5c3aa063fa958',
   consumerSecret: 'cs_53601b80bf1829af2bfcaa1d90e44642d13b9249',
-  wp_api: true,
+  wpAPI: true,
   version: 'wc/v1'
 });
 
@@ -44,14 +44,15 @@ var handlers = {
   "GetNumOrders": function() {
     console.log("GetNumOrders");
     _this = this;
-    WooCommerce.get('customers', function(err, data, res) {
+    WooCommerce.get('orders', function(err, data, res) {
       if (err) {
         return console.log(err);
       }
-      var numOrders = res.length;
+      var resJSON = JSON.parse(res);
+      numOrders = resJSON.length;
       var speech = "You currently have " + numOrders + " orders";
       console.log(speech);
-      _this.emit(":tell", speech);
+      //_this.emit(":tell", speech);
     });
   },
   "MostReturnedProduct": function() {
@@ -184,3 +185,5 @@ function getOrderIds() {
   });
   return ids;
 }
+
+handlers.GetNumOrders();
