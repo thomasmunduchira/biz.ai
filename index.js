@@ -123,13 +123,15 @@ var handlers = {
       status: 'completed'
     };
     _this = this;
-    getOrderIds().forEach(function(id) {
-      WooCommerce.post('orders/' + id, data, function(err, data, res) {
-        if (err) {
-          return console.log(err);
-        }
+    getOrderIds(function(ids) {
+      ids.forEach(function(id) {
+        WooCommerce.post('orders/' + id, data, function(err, data, res) {
+          if (err) {
+            return console.log(err);
+          }
+        });
       });
-      var speech = "Your orders have been marked complete";
+      var speech = "Your orders have been marked completed";
       console.log(speech);
       _this.emit(":tell", speech);
     });
@@ -174,17 +176,18 @@ var handlers = {
   }
 };
 
-function getOrderIds() {
+function getOrderIds(callback) {
   WooCommerce.get('orders', function(err, data, res) {
     if (err) {
       return console.log(err);
     }
     var ids = [];
-    res.forEach(function(order) {
+    var resJSON = JSON.parse(res);
+    resJSON.forEach(function(order) {
       ids.push(order.id);
     });
+    return callback(ids);
   });
-  return ids;
 }
 
-handlers.NetProfit();
+handlers.CompleteAllOrders();
