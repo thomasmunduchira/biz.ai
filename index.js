@@ -30,25 +30,37 @@ var handlers = {
     console.log("GetNumOrders");
     this.emit(":tell", "hello");
   },
+  "MostReturnedProduct": function() {
+    console.log("MostReturnedProduct");
+    getOrderIds().forEach(function(id) {
+      WooCommerce.get('orders/' + id + '/refunds', function(err, data, res) {
+        if (err) {
+          console.log(err);
+        }
+        var product_ids = [];
+        res.forEach(function(refund) {
+          product_ids.push(refund.line_items.product_id);
+        });
+        var frequencyMap = {};
+        product_ids.forEach(function(product_id) {
+          if (!frequencyMap[product_id]) {
+            frequencyMap[product_id] = 0;
+          }
+          frequencyMap[product_id]++;
+        });
+      });
+    });
+  },
   "CompleteAllOrders": function() {
     console.log("CompleteAllOrders");
-    WooCommerce.get('orders', function(err, data, res) {
-      if (err) {
-        console.log(err);
-      }
-      var ids = [];
-      res.forEach(function(order) {
-        ids.push(order.id);
-      });
-      var dataComplete = {
-        status: 'completed'
-      };
-      ids.forEach(function(id) {
-        WooCommerce.post('orders/' + id, dataCompleted, function(err, data, res) {
-          if (err) {
-            console.log(err);
-          }
-        });
+    var data = {
+      status: 'completed'
+    };
+    getOrderIds().forEach(function(id) {
+      WooCommerce.post('orders/' + id, data, function(err, data, res) {
+        if (err) {
+          console.log(err);
+        }
       });
     });
   },
@@ -77,3 +89,16 @@ var handlers = {
     this.emit("SessionEndedRequest");
   }
 };
+
+function getOrderIds() {
+  WooCommerce.get('orders', function(err, data, res) {
+    if (err) {
+      console.log(err);
+    }
+    var ids = [];
+    res.forEach(function(order) {
+      ids.push(order.id);
+    });
+  });
+  return ids;
+}
