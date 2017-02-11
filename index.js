@@ -138,21 +138,24 @@ var handlers = {
       _this.emit(":tell", speech);
     });
   },
+  "CompleteOrder": function() {
+    console.log("CompleteOrder");
+    var order_id = this.event.request.intent.slots.orderId.value;
+    _this = this;
+    completeOrder(order_id, function() {
+      var speech = "Your order has been marked complete";
+      console.log(speech);
+      _this.emit(":tell", speech);  
+    });
+  },
   "CompleteAllOrders": function() {
     console.log("CompleteAllOrders");
-    var data = {
-      status: 'completed'
-    };
     _this = this;
     getOrderIds(function(ids) {
       ids.forEach(function(id) {
-        WooCommerce.post('orders/' + id, data, function(err, data, res) {
-          if (err) {
-            return console.log(err);
-          }
-        });
+        completeOrder(id);
       });
-      var speech = "Your orders have been marked completed";
+      var speech = "Your orders have been marked complete";
       console.log(speech);
       _this.emit(":tell", speech);
     });
@@ -240,6 +243,17 @@ function getOrderIds(callback) {
   });
 }
 
+function completeOrder(order_id, callback) {
+  var data = {
+    status: 'completed'
+  };
+  WooCommerce.post('orders/' + order_id, data, function(err, data, res) {
+    if (err) {
+      return console.log(err);
+    }
+  });
+}
+
 function getProductReviewRating(product_id, callback) {
   WooCommerce.get('products/' + product_id + '/reviews', function(err, data, res) {
     if (err) {
@@ -269,4 +283,4 @@ function getProductReviewRating(product_id, callback) {
   });
 }
 
-handlers.CreateCoupons();
+handlers.CompleteAllOrders();
