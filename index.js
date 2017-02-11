@@ -192,33 +192,10 @@ var handlers = {
   },
   "ProductReviewRating": function() {
     console.log("ProductReviewRating");
+    var product_id = this.event.request.intent.slots.productId.value;
     _this = this;
-    WooCommerce.get('products/162/reviews', function(err, data, res) {
-      if (err) {
-        return console.log(err);
-      }
-      var resJSON = JSON.parse(res);
-      var reviews = "";
-      resJSON.forEach(function(review) {
-        reviews += review.review + " ";
-      });
-      var rating = sentiment(rating);
-      var score = rating.score;
-      var speech = "";
-      var ratingIndex;
-      var ratingList = ['highly negative', 'negative', 'mixed', 'positive', 'highly favorable'];
-      if (rating <= 1.75) {
-        ratingIndex = 0;
-      } else if (rating <= 0.5) {
-        ratingIndex = 1;
-      } else if (rating >= 1.75) {
-        ratingIndex = 4;
-      } else if (rating >= 0.5) {
-        ratingIndex = 3;
-      } else {
-        ratingIndex = 2;
-      }
-      speech = "Customers have a " + ratingList[ratingIndex] + " opinion of this product";
+    getProductReviewRating(product_id, function(rating) {
+      var speech = "Customers have a " + rating + " opinion of this product";
       console.log(speech);
       _this.emit(":tell", speech);
     });
@@ -260,6 +237,35 @@ function getOrderIds(callback) {
       ids.push(order.id);
     });
     return callback(ids);
+  });
+}
+
+function getProductReviewRating(product_id, callback) {
+  WooCommerce.get('products/' + product_id + '/reviews', function(err, data, res) {
+    if (err) {
+      return console.log(err);
+    }
+    var resJSON = JSON.parse(res);
+    var reviews = "";
+    resJSON.forEach(function(review) {
+      reviews += review.review + " ";
+    });
+    var rating = sentiment(rating);
+    var score = rating.score;
+    var ratingList = ['highly negative', 'negative', 'mixed', 'positive', 'highly favorable'];
+    var ratingIndex;
+    if (rating <= 1.75) {
+      ratingIndex = 0;
+    } else if (rating <= 0.5) {
+      ratingIndex = 1;
+    } else if (rating >= 1.75) {
+      ratingIndex = 4;
+    } else if (rating >= 0.5) {
+      ratingIndex = 3;
+    } else {
+      ratingIndex = 2;
+    }
+    return callback(ratingList[ratingIndex]);
   });
 }
 
