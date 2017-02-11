@@ -4,7 +4,8 @@
   "description": "Hack Merced 2017",
   "main": "index.js",
   "dependencies": {
-    "alexa-sdk": "^1.0.6"
+    "alexa-sdk": "^1.0.6",
+    "woocommerce-api": "^1.4.2"
   },
   "devDependencies": {},
   "scripts": {

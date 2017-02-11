@@ -1,4 +1,13 @@
 var Alexa = require("alexa-sdk");
+var WooCommerceAPI = require('woocommerce-api');
+
+var WooCommerce = new WooCommerceAPI({
+  url: 'http://example.com',
+  consumerKey: 'ck_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+  consumerSecret: 'cs_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+  wpAPI: true,
+  version: 'wc/v1'
+});
 
 var APP_ID = "amzn1.ask.skill.fe3b1c33-dd16-4b40-b8ff-3b98ccefc7fb";
 var SKILL_NAME = "HackMerced";
