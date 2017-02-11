@@ -170,6 +170,25 @@ var handlers = {
       _this.emit(":tell", speech);
     });
   },
+  "CreateCoupons": function() {
+    console.log("CreateCoupons");
+    _this = this;
+    var data = {
+      code: '10off' + Date(),
+      discount_type: 'percent',
+      amount: '10',
+      individual_use: true,
+      exclude_sale_items: true,
+    };
+    WooCommerce.post('coupons', data, function(err, data, res) {
+      if (err) {
+        return console.log(err);
+      }
+      var speech = "Your coupon has been released";
+      console.log(speech);
+      _this.emit(":tell", speech);
+    });
+  },
   "AMAZON.HelpIntent": function() {
     console.log("AMAZON.HelpIntent");
     var speech = "You can ask a question like, ? Please tell me .";
@@ -210,4 +229,4 @@ function getOrderIds(callback) {
   });
 }
 
-handlers.MostPopularProduct();
+handlers.CreateCoupons();
