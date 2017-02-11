@@ -1,5 +1,6 @@
 var Alexa = require('alexa-sdk');
 var WooCommerceAPI = require('woocommerce-api');
+var sentiment = require('sentiment');
 
 var WooCommerce = new WooCommerceAPI({
   url: 'http://dhanushpatel.x10host.com/',
@@ -185,6 +186,39 @@ var handlers = {
         return console.log(err);
       }
       var speech = "Your coupon has been released";
+      console.log(speech);
+      _this.emit(":tell", speech);
+    });
+  },
+  "ProductReviewRating": function() {
+    console.log("ProductReviewRating");
+    _this = this;
+    WooCommerce.get('products/162/reviews', function(err, data, res) {
+      if (err) {
+        return console.log(err);
+      }
+      var resJSON = JSON.parse(res);
+      var reviews = "";
+      resJSON.forEach(function(review) {
+        reviews += review.review + " ";
+      });
+      var rating = sentiment(rating);
+      var score = rating.score;
+      var speech = "";
+      var ratingIndex;
+      var ratingList = ['highly negative', 'negative', 'mixed', 'positive', 'highly favorable'];
+      if (rating <= 1.75) {
+        ratingIndex = 0;
+      } else if (rating <= 0.5) {
+        ratingIndex = 1;
+      } else if (rating >= 1.75) {
+        ratingIndex = 4;
+      } else if (rating >= 0.5) {
+        ratingIndex = 3;
+      } else {
+        ratingIndex = 2;
+      }
+      speech = "Customers have a " + ratingList[ratingIndex] + " opinion of this product";
       console.log(speech);
       _this.emit(":tell", speech);
     });
