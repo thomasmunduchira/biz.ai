@@ -1,0 +1,24 @@
+{
+  "name": "hack-merced-2017",
+  "version": "1.0.0",
+  "description": "Hack Merced 2017",
+  "main": "index.js",
+  "dependencies": {
+    "alexa-sdk": "^1.0.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thomasmunduchira/hack-merced-2017.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/thomasmunduchira/hack-merced-2017/issues"
+  },
+  "homepage": "https://github.com/thomasmunduchira/hack-merced-2017#readme"
+}
