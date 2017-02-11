@@ -30,6 +30,28 @@ var handlers = {
     console.log("GetNumOrders");
     this.emit(":tell", "hello");
   },
+  "CompleteAllOrders": function() {
+    console.log("CompleteAllOrders");
+    WooCommerce.get('orders', function(err, data, res) {
+      if (err) {
+        console.log(err);
+      }
+      var ids = [];
+      res.forEach(function(order) {
+        ids.push(order.id);
+      });
+      var dataComplete = {
+        status: 'completed'
+      };
+      ids.forEach(function(id) {
+        WooCommerce.post('orders/' + id, dataCompleted, function(err, data, res) {
+          if (err) {
+            console.log(err);
+          }
+        });
+      });
+    });
+  },
   "AMAZON.HelpIntent": function() {
     console.log("AMAZON.HelpIntent");
     var speech = "You can ask a question like, ? Please tell me .";
@@ -37,15 +59,15 @@ var handlers = {
     this.attributes.repromptSpeech = speech;
     this.emit(":ask", this.attributes.speechOutput, this.attributes.repromptSpeech);
   },
-  "AMAZON.StopIntent": function () {
+  "AMAZON.StopIntent": function() {
     console.log("AMAZON.StopIntent");
     this.emit("SessionEndedRequest");
   },
-  "AMAZON.CancelIntent": function () {
+  "AMAZON.CancelIntent": function() {
     console.log("AMAZON.CancelIntent");
     this.emit("SessionEndedRequest");
   },
-  "SessionEndedRequest":function () {
+  "SessionEndedRequest":function() {
     console.log("SessionEndedRequest");
     this.emit(":tell", "Goodbye!");
   },
