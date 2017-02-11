@@ -58,42 +58,46 @@ var handlers = {
   "MostReturnedProduct": function() {
     console.log("MostReturnedProduct");
     _this = this;
-    getOrderIds().forEach(function(id) {
-      WooCommerce.get('orders/' + id + '/refunds', function(err, data, res) {
-        if (err) {
-          return console.log(err);
-        }
-        var product_ids = [];
-        res.forEach(function(refund) {
-          product_ids.push(refund.line_items.product_id);
-        });
-        var frequencyMap = {};
-        product_ids.forEach(function(product_id) {
-          if (!frequencyMap[product_id]) {
-            frequencyMap[product_id] = 0;
-          }
-          frequencyMap[product_id]++;
-        });
-        var max_product_id;
-        var max_frequency;
-        for (var key in frequencyMap) {
-          if (validation_messages.hasOwnProperty(key)) {
-            var frequency = frequencyMap[key];
-            if (frequency > max_frequency) {
-              max_product_id = key;
-              max_frequency = frequency;
-            }
-          }
-        }
-        WooCommerce.get('products/' + max_product_id, function(err, data, res) {
+    getOrderIds(function(ids) {
+      var order_ids = [];
+      ids.forEach(function(id) {
+        WooCommerce.get('orders/' + id + '/refunds', function(err, data, res) {
           if (err) {
             return console.log(err);
           }
-          var product_name = res.name;
-          var speech = "Your most returned product is " + product_name + ", with " + max_frequency + " returns";
-          console.log(speech);
-          _this.emit(":tell", speech);
+          var resJSON = JSON.parse(res);
+          resJSON.forEach(function(refund) {
+            order_ids.push(refund.line_items.product_id);
+          });
         });
+      });
+      var frequencyMap = {};
+      product_ids.forEach(function(product_id) {
+        if (!frequencyMap[product_id]) {
+          frequencyMap[product_id] = 0;
+        }
+        frequencyMap[product_id]++;
+      });
+      var max_product_id;
+      var max_frequency;
+      for (var key in frequencyMap) {
+        if (validation_messages.hasOwnProperty(key)) {
+          var frequency = frequencyMap[key];
+          if (frequency >= max_frequency) {
+            max_product_id = key;
+            max_frequency = frequency;
+          }
+        }
+      }
+      WooCommerce.get('products/' + max_product_id, function(err, data, res) {
+        if (err) {
+          return console.log(err);
+        }
+        var resJSON = JSON.parse(res);
+        var product_name = resJSON.name;
+        var speech = "Your most returned product is " + product_name + ", with " + max_frequency + " returns";
+        console.log(speech);
+        _this.emit(":tell", speech);
       });
     });
   },
@@ -190,4 +194,4 @@ function getOrderIds(callback) {
   });
 }
 
-handlers.CompleteAllOrders();
+handlers.MostReturnedProduct();
