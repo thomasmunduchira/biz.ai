@@ -30,6 +30,9 @@ var handlers = {
     var origins = [];
     var speech = "Your customers are from " + origins + " and so on";
     WooCommerce.get('customers', function(err, data, res) {
+      if (err) {
+        return console.log(err);
+      }
       res.map(function(customer) {
         origins.push(customer.billing.country);
       });
@@ -44,7 +47,7 @@ var handlers = {
     getOrderIds().forEach(function(id) {
       WooCommerce.get('orders/' + id + '/refunds', function(err, data, res) {
         if (err) {
-          console.log(err);
+          return console.log(err);
         }
         var product_ids = [];
         res.forEach(function(refund) {
@@ -68,9 +71,18 @@ var handlers = {
     getOrderIds().forEach(function(id) {
       WooCommerce.post('orders/' + id, data, function(err, data, res) {
         if (err) {
-          console.log(err);
+          return console.log(err);
         }
       });
+    });
+  },
+  "NetProfit": function() {
+    console.log("NetProfit");
+    WooCommerce.get('reports/sales', function(err, data, res) {
+      if (err) {
+        return console.log(err);
+      }
+      var net_sales = res[0].total_refunds;
     });
   },
   "AMAZON.HelpIntent": function() {
@@ -102,7 +114,7 @@ var handlers = {
 function getOrderIds() {
   WooCommerce.get('orders', function(err, data, res) {
     if (err) {
-      console.log(err);
+      return console.log(err);
     }
     var ids = [];
     res.forEach(function(order) {
