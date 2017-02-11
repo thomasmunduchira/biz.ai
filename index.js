@@ -26,20 +26,24 @@ var handlers = {
     this.attributes.repromptSpeech = "To find , say something like: what was ?";
     this.emit(":ask", this.attributes.speechOutput, this.attributes.repromptSpeech);
   },
-  "GetCustomerOrigins": function(){
-    var origins = [];
-    var speech = "Your customers are from " + origins + " and so on";
+  "GetCustomerOrigins": function() {
+    console.log("GetCustomerOrigins");
+    _this = this;
     WooCommerce.get('customers', function(err, data, res) {
       if (err) {
         return console.log(err);
       }
+      var origins = [];
       res.map(function(customer) {
         origins.push(customer.billing.country);
       });
+      var speech = "Your customers are from " + origins + " and so on";
+      _this.emit(":tell", speech);
     });
   },
   "GetNumOrders": function() {
     console.log("GetNumOrders");
+    _this = this;
     WooCommerce.get('customers', function(err, data, res) {
       if (err) {
         return console.log(err);
@@ -47,11 +51,12 @@ var handlers = {
       var numOrders = res.length;
       var speech = "You currently have " + numOrders + " orders";
       console.log(speech);
-      this.emit(":tell", speech);
+      _this.emit(":tell", speech);
     });
   },
   "MostReturnedProduct": function() {
     console.log("MostReturnedProduct");
+    _this = this;
     getOrderIds().forEach(function(id) {
       WooCommerce.get('orders/' + id + '/refunds', function(err, data, res) {
         if (err) {
@@ -68,11 +73,32 @@ var handlers = {
           }
           frequencyMap[product_id]++;
         });
+        var max_product_id;
+        var max_frequency;
+        for (var key in frequencyMap) {
+          if (validation_messages.hasOwnProperty(key)) {
+            var frequency = frequencyMap[key];
+            if (frequency > max_frequency) {
+              max_product_id = key;
+              max_frequency = frequency;
+            }
+          }
+        }
+        WooCommerce.get('products/' + max_product_id, function(err, data, res) {
+          if (err) {
+            return console.log(err);
+          }
+          var product_name = res.name;
+          var speech = "Your most returned product is " + product_name + ", with " + max_frequency + " returns";
+          console.log(speech);
+          _this.emit(":tell", speech);
+        });
       });
     });
   },
   "MostPopularProduct": function() {
     console.log("MostPopularProduct");
+    _this = this;
     WooCommerce.get('products', function(err, data, res) {
       if (err) {
         return console.log(err);
@@ -85,6 +111,9 @@ var handlers = {
           max_product_sales = product.total_sales;
         }
       });
+      var speech = "Your most popular product is " + max_product_name + " with " + max_product_sales + " sales";
+      console.log(speech);
+      _this.emit(":tell", speech);
     });
   },
   "CompleteAllOrders": function() {
@@ -92,21 +121,29 @@ var handlers = {
     var data = {
       status: 'completed'
     };
+    _this = this;
     getOrderIds().forEach(function(id) {
       WooCommerce.post('orders/' + id, data, function(err, data, res) {
         if (err) {
           return console.log(err);
         }
       });
+      var speech = "Your orders have been marked complete";
+      console.log(speech);
+      _this.emit(":tell", speech);
     });
   },
   "NetProfit": function() {
     console.log("NetProfit");
+    _this = this;
     WooCommerce.get('reports/sales', function(err, data, res) {
       if (err) {
         return console.log(err);
       }
       var net_sales = res[0].total_refunds;
+      var speech = "Your net profit is " + net_sales;
+      console.log(speech);
+      _this.emit(":tell", speech);
     });
   },
   "AMAZON.HelpIntent": function() {
