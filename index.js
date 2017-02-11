@@ -82,6 +82,7 @@ var handlers = {
           }
           var resJSON = JSON.parse(res);
           resJSON.forEach(function(refund) {
+            console.log(refund.line_items.product_id);
             order_ids.push(refund.line_items.product_id);
           });
         });
@@ -112,7 +113,7 @@ var handlers = {
         var product_name = resJSON.name;
         var speech = "Your most returned product is " + product_name + ", with " + max_frequency + " returns";
         console.log(speech);
-        _this.emit(":tell", speech);
+        //_this.emit(":tell", speech);
       });
     });
   },
@@ -210,4 +211,4 @@ function getOrderIds(callback) {
   });
 }
 
-handlers.MostPopularProduct();
+handlers.MostReturnedProduct();
