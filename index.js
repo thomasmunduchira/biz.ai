@@ -52,7 +52,7 @@ var handlers = {
       numOrders = resJSON.length;
       var speech = "You currently have " + numOrders + " orders";
       console.log(speech);
-      //_this.emit(":tell", speech);
+      _this.emit(":tell", speech);
     });
   },
   "MostReturnedProduct": function() {
@@ -141,7 +141,8 @@ var handlers = {
       if (err) {
         return console.log(err);
       }
-      var net_sales = res[0].total_refunds;
+      var resJSON = JSON.parse(res);
+      var net_sales = resJSON[0].net_sales;
       var speech = "Your net profit is " + net_sales;
       console.log(speech);
       _this.emit(":tell", speech);
@@ -186,4 +187,4 @@ function getOrderIds() {
   return ids;
 }
 
-handlers.GetNumOrders();
+handlers.NetProfit();
