@@ -1,5 +1,6 @@
 var Alexa = require('alexa-sdk');
 var WooCommerceAPI = require('woocommerce-api');
+var sentiment = require('sentiment');
 
 var WooCommerce = new WooCommerceAPI({
   url: 'http://dhanushpatel.x10host.com/',
@@ -171,6 +172,54 @@ var handlers = {
       _this.emit(":tell", speech);
     });
   },
+  "CreateCoupons": function() {
+    console.log("CreateCoupons");
+    _this = this;
+    var data = {
+      code: '10off' + Date(),
+      discount_type: 'percent',
+      amount: '10',
+      individual_use: true,
+      exclude_sale_items: true,
+    };
+    WooCommerce.post('coupons', data, function(err, data, res) {
+      if (err) {
+        return console.log(err);
+      }
+      var speech = "Your coupon has been released";
+      console.log(speech);
+      _this.emit(":tell", speech);
+    });
+  },
+  "ProductReviewRating": function() {
+    console.log("ProductReviewRating");
+    var product_id = this.event.request.intent.slots.productId.value;
+    _this = this;
+    getProductReviewRating(product_id, function(rating) {
+      var speech = "Customers have a " + rating + " opinion of this product";
+      console.log(speech);
+      _this.emit(":tell", speech);
+    });
+  },
+"SalesForecast": function() {
+  console.log("SalesForecast");
+  var product_id = this.event.request.intent.slots.productId.value;
+  _this = this;
+  WooCommerce.get('products/' + product_id, function(err, data, res) {
+  if (err) {
+    return console.log(err);
+  }
+  var product_price = res.price;
+  getProductReviewRating(product_id, function(rating) {
+    var scaled_rating = rating / 20;
+    var scaled_percentage = scaled_rating * 100;
+    var speech = "In the next quarter, the price of this product will " + (rating > 0 ? "increase" : "decrease") +" by " + scaled_percentage + "% to " + scaled_rating * product_price;
+    console.log(speech);
+    _this.emit(":tell", speech);
+  })
+});
+}
+
   "AMAZON.HelpIntent": function() {
     console.log("AMAZON.HelpIntent");
     var speech = "You can ask a question like, ? Please tell me .";
@@ -211,4 +260,35 @@ function getOrderIds(callback) {
   });
 }
 
-handlers.MostReturnedProduct();
+function getProductReviewRating(product_id, callback) {
+  WooCommerce.get('products/' + product_id + '/reviews', function(err, data, res) {
+    if (err) {
+      return console.log(err);
+    }
+    var resJSON = JSON.parse(res);
+    var reviews = "";
+    resJSON.forEach(function(review) {
+      reviews += review.review + " ";
+    });
+    var rating = sentiment(rating);
+    var score = rating.score;
+    var ratingList = ['highly negative', 'negative', 'mixed', 'positive', 'highly favorable'];
+    var ratingIndex;
+    if (rating <= 1.75) {
+      ratingIndex = 0;
+    } else if (rating <= 0.5) {
+      ratingIndex = 1;
+    } else if (rating >= 1.75) {
+      ratingIndex = 4;
+    } else if (rating >= 0.5) {
+      ratingIndex = 3;
+    } else {
+      ratingIndex = 2;
+    }
+    return callback(ratingList[ratingIndex]);
+  });
+}
+
+
+
+handlers.SalesForecast();
