@@ -65,7 +65,7 @@ var handlers = {
       numOrders = ids.length;
       var speech = "You currently have " + numOrders + " orders";
       console.log(speech);
-      //_this.emit(":tell", speech);
+      _this.emit(":tell", speech);
     });
   },
   "MostReturnedProduct": function() {
@@ -111,7 +111,7 @@ var handlers = {
         var product_name = resJSON.name;
         var speech = "Your most returned product is " + product_name + ", with " + max_frequency + " returns";
         console.log(speech);
-        //_this.emit(":tell", speech);
+        _this.emit(":tell", speech);
       });
     });
   },
@@ -143,7 +143,7 @@ var handlers = {
     completeOrder(order_id, function() {
       var speech = "Your order has been marked complete";
       console.log(speech);
-      //_this.emit(":tell", speech);
+      _this.emit(":tell", speech);
     });
   },
   "CompleteAllOrders": function() {
@@ -157,7 +157,7 @@ var handlers = {
       });
       var speech = "Your orders have been marked complete";
       console.log(speech);
-      //_this.emit(":tell", speech);
+      _this.emit(":tell", speech);
     });
   },
   "NetProfit": function() {
@@ -229,7 +229,7 @@ var handlers = {
       var rating = ratingList[ratingIndex];
       var speech = "Customers have a " + rating + " opinion of product " + product_id;
       console.log(speech);
-      //_this.emit(":tell", speech);
+      _this.emit(":tell", speech);
     });
   },
   "SalesForecast": function() {
@@ -247,7 +247,7 @@ var handlers = {
         var percentage = (new_product_price / product_price - 1) * 100;
         var speech = "In the next quarter, the price of product " + product_id + " will " + (score > 0 ? "increase" : "decrease") +" by " + Math.round(percentage * 100) / 100 + "% from " + product_price + " dollars to " + Math.round(new_product_price * 100) / 100 + " dollars";
         console.log(speech);
-        //_this.emit(":tell", speech);
+        _this.emit(":tell", speech);
       });
     });
   },
@@ -267,7 +267,58 @@ var handlers = {
       var total_sales = resJSON[0].total_sales;
       var speech = "Yesterday, " + total_orders + " orders were placed and " + total_sales + " dollars were earned in profit";
       console.log(speech);
-      //_this.emit(":tell", speech);
+      _this.emit(":tell", speech);
+    });
+  },
+  "BestProductCategory": function() {
+    console.log("BestProductCategory");
+    var tags = {};
+    WooCommerce.get('products', function(err, data, res) {
+      if (err) {
+        return console.log(err);
+      }
+      var resJSON = JSON.parse(res);
+      resJSON.forEach(function(product) {
+        var product_tags = product.tags;
+        product_tags.forEach(function(tag) {
+          if (!tags[tag.name]) {
+            tags[tag.name] = [];
+          }
+          tags[tag.name].push(product.id);
+        });
+      });
+      var best_selling_category_name;
+      var best_selling_category_average_sales = 0;
+      console.log(tags);
+      for (var tag in tags) {
+        if (tags.hasOwnProperty(tag)) {
+          console.log(tags[tag]);
+          var number_of_products = 0;
+          var total_sales = 0;
+          tags[tag].forEach(function(product_id) {
+            var first = true;
+            WooCommerce.get('products/' + product_id, function(err, data, res) {
+              if (err) {
+                return console.log(err);
+              }
+              var resJSON = JSON.parse(res);
+              var number_of_products = resJSON.length;
+              var product_sales = parseFloat(resJSON.total_sales);
+              total_sales += product_sales;
+            });
+          });
+          console.log(total_sales);
+          console.log(number_of_products);
+          var average_sales = total_sales / number_of_products;
+          if (average_sales >= best_selling_category_average_sales) {
+            best_selling_category_name = tag;
+            best_selling_category_average_sales = average_sales;
+          }
+        }
+      }
+      var speech = "Your best selling product category is " + best_selling_category_name + ", with average sales per product of " + best_selling_category_average_sales + " dollars";
+      console.log(speech);
+      _this.emit(":tell", speech);
     });
   },
   "AMAZON.HelpIntent": function() {
@@ -378,4 +429,4 @@ function getProductReviewSentimentScore(product_id, callback) {
   });
 }
 
-handlers.DailyBusinessReport();
+handlers.BestProductCategory();
