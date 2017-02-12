@@ -251,6 +251,25 @@ var handlers = {
       });
     });
   },
+  "DailyBusinessReport": function() {
+    console.log("DailyBusinessReport");
+    var today = new Date();
+    var year = today.getFullYear();
+    var month = ("0" + (today.getMonth() + 1)).slice(-2);
+    var day = ("0" + (today.getDate() - 1)).slice(-2);
+    _this = this;
+    WooCommerce.get('reports/sales?date_min=' + year + '-' + month + '-' + day, function(err, data, res) {
+      if (err) {
+        return console.log(err);
+      }
+      var resJSON = JSON.parse(res);
+      var total_orders = resJSON[0].total_orders;
+      var total_sales = resJSON[0].total_sales;
+      var speech = "Yesterday, " + total_orders + " orders were placed and " + total_sales + " dollars were earned in profit";
+      console.log(speech);
+      //_this.emit(":tell", speech);
+    });
+  },
   "AMAZON.HelpIntent": function() {
     console.log("AMAZON.HelpIntent");
     var speech = "You can ask a question like, ? Please tell me .";
@@ -359,4 +378,4 @@ function getProductReviewSentimentScore(product_id, callback) {
   });
 }
 
-handlers.CompleteAllOrders();
+handlers.DailyBusinessReport();
