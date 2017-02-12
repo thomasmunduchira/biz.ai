@@ -179,8 +179,8 @@ var handlers = {
     console.log("CouponNeeded");
     var product_id = this.event.request.intent.slots.productId.value;
     _this = this;
-    getProductReviewRating(product_id, function(rating) {
-      var speech = "This product " + (rating > 0.5 ? "doesn't" : "does") + " need a coupon";
+    getProductReviewSentimentScore(product_id, function(score) {
+      var speech = "This product " + (score > 0.5 ? "doesn't" : "does") + " need a coupon";
       console.log(speech);
       _this.emit(":tell", speech);
     });
@@ -230,7 +230,7 @@ var handlers = {
   },
   "SalesForecast": function() {
     console.log("SalesForecast");
-    var product_id = 30;
+    var product_id = 32;
     _this = this;
     WooCommerce.get('products/' + product_id, function(err, data, res) {
       if (err) {
@@ -239,10 +239,11 @@ var handlers = {
       var resJSON = JSON.parse(res);
       var product_price = parseFloat(resJSON.price);
       getProductReviewSentimentScore(product_id, function(score) {
-        var percentage = score * 100;
-        var speech = "In the next quarter, the price of this product will " + (score > 0 ? "increase" : "decrease") +" by " + Math.round(percentage * 100) / 100 + "% from " + product_price + " dollars to " + Math.round((score + product_price) * 100) / 100 + " dollars";
+        var new_product_price = score + product_price;
+        var percentage = (new_product_price / product_price - 1) * 100;
+        var speech = "In the next quarter, the price of this product will " + (score > 0 ? "increase" : "decrease") +" by " + Math.round(percentage * 100) / 100 + "% from " + product_price + " dollars to " + Math.round(new_product_price * 100) / 100 + " dollars";
         console.log(speech);
-        _this.emit(":tell", speech);
+        //_this.emit(":tell", speech);
       });
     });
   },
