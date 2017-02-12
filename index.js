@@ -142,24 +142,26 @@ var handlers = {
   },
   "CompleteOrder": function() {
     console.log("CompleteOrder");
-    var order_id = this.event.request.intent.slots.orderId.value;
+    var order_id = 73;
     _this = this;
     completeOrder(order_id, function() {
       var speech = "Your order has been marked complete";
       console.log(speech);
-      _this.emit(":tell", speech);
+      //_this.emit(":tell", speech);
     });
   },
   "CompleteAllOrders": function() {
     console.log("CompleteAllOrders");
     _this = this;
     getOrderIds(function(ids) {
+      console.log(ids);
       ids.forEach(function(id) {
-        completeOrder(id);
+        console.log(id);
+        completeOrder(id, function() {});
       });
       var speech = "Your orders have been marked complete";
       console.log(speech);
-      _this.emit(":tell", speech);
+      //_this.emit(":tell", speech);
     });
   },
   "NetProfit": function() {
@@ -320,7 +322,7 @@ var sellingHandlers = {
 };
 
 function getOrderIds(callback) {
-  WooCommerce.get('orders', function(err, data, res) {
+  WooCommerce.get('orders?per_page=100', function(err, data, res) {
     if (err) {
       return console.log(err);
     }
@@ -361,4 +363,4 @@ function getProductReviewSentimentScore(product_id, callback) {
   });
 }
 
-handlers.SalesForecast();
+handlers.ProductReviewRating();
