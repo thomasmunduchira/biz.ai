@@ -61,15 +61,11 @@ var handlers = {
   "GetNumOrders": function() {
     console.log("GetNumOrders");
     _this = this;
-    WooCommerce.get('orders', function(err, data, res) {
-      if (err) {
-        return console.log(err);
-      }
-      var resJSON = JSON.parse(res);
-      numOrders = resJSON.length;
+    getOrderIds(function(ids) {
+      numOrders = ids.length;
       var speech = "You currently have " + numOrders + " orders";
       console.log(speech);
-      _this.emit(":tell", speech);
+      //_this.emit(":tell", speech);
     });
   },
   "MostReturnedProduct": function() {
@@ -214,7 +210,7 @@ var handlers = {
   },
   "ProductReviewRating": function() {
     console.log("ProductReviewRating");
-    var product_id = this.event.request.intent.slots.productId.value;
+    var product_id = 32;
     _this = this;
     var ratingList = ['highly negative', 'negative', 'mixed', 'positive', 'highly favorable'];
     getProductReviewSentimentScore(product_id, function(score) {
@@ -233,7 +229,7 @@ var handlers = {
       var rating = ratingList[ratingIndex];
       var speech = "Customers have a " + rating + " opinion of product " + product_id;
       console.log(speech);
-      _this.emit(":tell", speech);
+      //_this.emit(":tell", speech);
     });
   },
   "SalesForecast": function() {
@@ -363,4 +359,4 @@ function getProductReviewSentimentScore(product_id, callback) {
   });
 }
 
-handlers.ProductReviewRating();
+handlers.CompleteAllOrders();
