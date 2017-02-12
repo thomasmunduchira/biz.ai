@@ -174,6 +174,16 @@ var handlers = {
       _this.emit(":tell", speech);
     });
   },
+  "CouponNeeded": function() {
+    console.log("CouponNeeded");
+    var product_id = this.event.request.intent.slots.productId.value;
+    _this = this;
+    getProductReviewRating(product_id, function(rating) {
+      var speech = "This product " + (rating > 0.5 ? "doesn't" : "does") + " need a coupon";
+      console.log(speech);
+      _this.emit(":tell", speech);
+    });
+  },
   "CreateCoupons": function() {
     console.log("CreateCoupons");
     _this = this;
