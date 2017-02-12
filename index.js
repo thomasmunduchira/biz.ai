@@ -230,18 +230,17 @@ var handlers = {
   },
   "SalesForecast": function() {
     console.log("SalesForecast");
-    var product_id = this.event.request.intent.slots.productId.value;
+    var product_id = 30;
     _this = this;
     WooCommerce.get('products/' + product_id, function(err, data, res) {
       if (err) {
         return console.log(err);
       }
       var resJSON = JSON.parse(res);
-      var product_price = resJSON.price;
+      var product_price = parseFloat(resJSON.price);
       getProductReviewSentimentScore(product_id, function(score) {
-        var scaled_score = score / 20;
-        var scaled_percentage = scaled_score * 100;
-        var speech = "In the next quarter, the price of this product will " + (score > 0 ? "increase" : "decrease") +" by " + scaled_percentage + "% to " + scaled_score * product_price;
+        var percentage = score * 100;
+        var speech = "In the next quarter, the price of this product will " + (score > 0 ? "increase" : "decrease") +" by " + Math.round(percentage * 100) / 100 + "% from " + product_price + " dollars to " + Math.round((score + product_price) * 100) / 100 + " dollars";
         console.log(speech);
         _this.emit(":tell", speech);
       });
@@ -308,8 +307,8 @@ function getProductReviewSentimentScore(product_id, callback) {
     resJSON.forEach(function(review) {
       reviews += review.review + " ";
     });
-    var rating = sentiment(rating);
-    var score = rating.score;
+    var rating = sentiment(reviews);
+    var score = rating.comparative;
     return callback(score);
   });
 }
