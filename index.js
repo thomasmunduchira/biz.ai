@@ -183,7 +183,7 @@ var handlers = {
       if (score < 0) {
         speech += "does need a coupon due to lower than usual sales";
       } else {
-        speech = "does not need a coupon due to strong sales";
+        speech += "does not need a coupon due to strong sales";
       }
       console.log(speech);
       _this.emit(":tell", speech);
@@ -215,9 +215,9 @@ var handlers = {
     var ratingList = ['highly negative', 'negative', 'mixed', 'positive', 'highly favorable'];
     getProductReviewSentimentScore(product_id, function(score) {
       var ratingIndex;
-      if (score <= 1.75) {
+      if (score <= -1.75) {
         ratingIndex = 0;
-      } else if (score <= 0.5) {
+      } else if (score <= -0.5) {
         ratingIndex = 1;
       } else if (score >= 1.75) {
         ratingIndex = 4;
