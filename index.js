@@ -16,7 +16,7 @@ var SKILL_NAME = "HackMerced";
 exports.handler = function(event, context, callback) {
   var alexa = Alexa.handler(event, context);
   alexa.APP_ID = APP_ID;
-  alexa.registerHandlers(handlers);
+  alexa.registerHandlers(handlers, sellingHandlers);
   alexa.execute();
 };
 
@@ -45,15 +45,16 @@ var handlers = {
   "GetCustomerOrigins": function() {
     console.log("GetCustomerOrigins");
     _this = this;
-    WooCommerce.get('customers', function(err, data, res) {
+    WooCommerce.get('orders', function(err, data, res) {
       if (err) {
         return console.log(err);
       }
       var origins = [];
-      res.map(function(customer) {
-        origins.push(customer.billing.country);
+      var customers = JSON.parse(res);
+      customers.map(function(customer) {
+        origins.push(customer.billing.city);
       });
-      var speech = "Your customers are from " + origins + " and so on";
+      var speech = "Your customers are from " + origins.join() + " and so on";
       _this.emit(":tell", speech);
     });
   },
@@ -170,7 +171,7 @@ var handlers = {
       }
       var resJSON = JSON.parse(res);
       var net_sales = resJSON[0].net_sales;
-      var speech = "Your net profit is " + net_sales;
+      var speech = "Your net profit is " + net_sales + " dollars";
       console.log(speech);
       _this.emit(":tell", speech);
     });
@@ -180,7 +181,12 @@ var handlers = {
     var product_id = this.event.request.intent.slots.productId.value;
     _this = this;
     getProductReviewSentimentScore(product_id, function(score) {
-      var speech = "This product " + (score > 0.5 ? "doesn't" : "does") + " need a coupon";
+      var speech = "Product " + product_id;
+      if (score < 0) {
+        speech += "does need a coupon due to lower than usual sales";
+      } else {
+        speech = "does not need a coupon due to strong sales";
+      }
       console.log(speech);
       _this.emit(":tell", speech);
     });
@@ -199,7 +205,7 @@ var handlers = {
       if (err) {
         return console.log(err);
       }
-      var speech = "Your coupon has been released";
+      var speech = "Your ten percent off coupon has been released";
       console.log(speech);
       _this.emit(":tell", speech);
     });
@@ -223,7 +229,7 @@ var handlers = {
         ratingIndex = 2;
       }
       var rating = ratingList[ratingIndex];
-      var speech = "Customers have a " + rating + " opinion of this product";
+      var speech = "Customers have a " + rating + " opinion of product " + product_id;
       console.log(speech);
       _this.emit(":tell", speech);
     });
@@ -241,7 +247,7 @@ var handlers = {
       getProductReviewSentimentScore(product_id, function(score) {
         var new_product_price = score + product_price;
         var percentage = (new_product_price / product_price - 1) * 100;
-        var speech = "In the next quarter, the price of this product will " + (score > 0 ? "increase" : "decrease") +" by " + Math.round(percentage * 100) / 100 + "% from " + product_price + " dollars to " + Math.round(new_product_price * 100) / 100 + " dollars";
+        var speech = "In the next quarter, the price of product " + product_id + " will " + (score > 0 ? "increase" : "decrease") +" by " + Math.round(percentage * 100) / 100 + "% from " + product_price + " dollars to " + Math.round(new_product_price * 100) / 100 + " dollars";
         console.log(speech);
         //_this.emit(":tell", speech);
       });
@@ -263,6 +269,46 @@ var handlers = {
     this.emit("SessionEndedRequest");
   },
   "SessionEndedRequest":function() {
+    console.log("SessionEndedRequest");
+    this.emit(":tell", "Goodbye!");
+  },
+  "Unhandled": function() {
+    console.log("Unhandled");
+    this.emit(":tell", "Sorry, I was unable to understand and process your request. Please try again.");
+    this.emit("SessionEndedRequest");
+  }
+};
+
+var data = {
+  vname: "",
+  regular_price: "",    
+};
+
+var sellingHandlers = {
+  'SellingStuff': function() {
+    console.log(this.event.request.intent.slots.productName);
+    console.log(this.event.request.intent.slots.productPrice);
+    data.name = this.event.request.intent.slots.productName.value;
+    data.regular_price = this.event.request.intent.slots.productPrice.value;
+    this.emit(':ask', 'Alright! Would you like to provied any description for ' + this.event.request.intent.slots.productName.value + ' ?');
+  },
+  'AMAZON.YesIntent': function() {
+    this.emit(':ask', "and your description is?");
+  },
+  'AMAZON.NoIntent': function() {
+    this.emit(':tell', 'Ok, Your item is in the store.');
+    WooCommerce.post('products', data, function(err, data, res) {
+      console.log(res);
+    });
+  },
+  "MakeDescription": function() {
+    data.description = this.event.request.intent.slots.description.value;
+    WooCommerce.post('products', data, function(err, data, res) {
+      console.log(res);
+    });
+    this.emit(':tell', 'Your description is added and your item is in the store!');
+  },
+  "SessionEndedRequest":function () {
     console.log("SessionEndedRequest");
     this.emit(":tell", "Goodbye!");
   },
@@ -295,6 +341,7 @@ function completeOrder(order_id, callback) {
     if (err) {
       return console.log(err);
     }
+    return callback();
   });
 }
 
